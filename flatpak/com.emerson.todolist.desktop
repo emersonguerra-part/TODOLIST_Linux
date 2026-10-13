@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=To-Do List
+GenericName=Gerenciador de Tarefas
+Comment=Aplicativo de Gerenciamento de Tarefas com Sincronização em Nuvem
+Exec=TodoListApp.Linux
+Icon=com.emerson.todolist
+Terminal=false
+Categories=Utility;Office;ProjectManagement;
+StartupWMClass=TodoListApp.Linux
+Keywords=todo;tasks;tarefas;todolist;

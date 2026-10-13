@@ -1,0 +1,946 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:TodoListApp.Models"
+        xmlns:controls="clr-namespace:TodoListApp.Linux.Controls"
+        mc:Ignorable="d"
+        x:Class="TodoListApp.Linux.MainWindow"
+        Title="To-Do List"
+        Icon="app.ico"
+        Width="460" Height="680"
+        MinWidth="380" MinHeight="450"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="32"
+        ExtendClientAreaChromeHints="NoChrome"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        FontFamily="Inter, Segoe UI, Arial, sans-serif">
+
+    <Window.Styles>
+        <!-- Estilo Moderno do CheckBox de Tarefas -->
+        <Style Selector="CheckBox.todoCheck">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="18"/>
+            <Setter Property="MinHeight" Value="18"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border x:Name="CheckBorder"
+                            Width="18" Height="18"
+                            CornerRadius="4"
+                            Background="{DynamicResource SurfaceBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderHoverBrush}"
+                            BorderThickness="1.5">
+                        <Path Data="M3,9 L7,13 L15,4"
+                              Stroke="White"
+                              StrokeThickness="2"
+                              StrokeLineCap="Round"
+                              StrokeJoin="Round"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              IsVisible="{TemplateBinding IsChecked}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="CheckBox.todoCheck:checked /template/ Border#CheckBorder">
+            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+        </Style>
+        <Style Selector="CheckBox.todoCheck:pointerover /template/ Border#CheckBorder">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+        </Style>
+
+        <!-- CheckBox Menor para Subtarefas -->
+        <Style Selector="CheckBox.subtaskCheck">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="16"/>
+            <Setter Property="MinHeight" Value="16"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border x:Name="SubCheckBorder"
+                            Width="16" Height="16"
+                            CornerRadius="4"
+                            Background="{DynamicResource SurfaceBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderHoverBrush}"
+                            BorderThickness="1.5">
+                        <Path Data="M2.5,8 L6,11.5 L13.5,3.5"
+                              Stroke="White"
+                              StrokeThickness="1.8"
+                              StrokeLineCap="Round"
+                              StrokeJoin="Round"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              IsVisible="{TemplateBinding IsChecked}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="CheckBox.subtaskCheck:checked /template/ Border#SubCheckBorder">
+            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
+        </Style>
+
+        <!-- Estilo de Título Concluído (Strikethrough) -->
+        <Style Selector="TextBlock.completedTitle">
+            <Setter Property="TextDecorations" Value="Strikethrough"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        </Style>
+
+        <!-- Botão de Excluir ✕ -->
+        <Style Selector="Button.delBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        </Style>
+        <Style Selector="Button.delBtn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource DangerLightBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+        </Style>
+
+        <!-- Botão de Excluir Subtarefa ✕ -->
+        <Style Selector="Button.delSubBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        </Style>
+        <Style Selector="Button.delSubBtn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource DangerLightBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+        </Style>
+
+        <!-- Botões de Controle da Janela (Minimizar, Maximizar, Fechar) -->
+        <Style Selector="Button.titleBtn">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+        <Style Selector="Button.titleBtn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TitleBarButtonHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.closeBtn">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+        <Style Selector="Button.closeBtn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TitleBarCloseHoverBrush}"/>
+        </Style>
+        <Style Selector="Button.closeBtn:pointerover Path">
+            <Setter Property="Stroke" Value="White"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid>
+        <!-- Overlay Superior de Confetes e Partículas (Renderizado com Skia 60FPS) -->
+        <controls:ConfettiOverlay x:Name="ConfettiCanvas"
+                                  ZIndex="999"
+                                  IsHitTestVisible="False"/>
+
+        <!-- Layout Principal -->
+        <Grid RowDefinitions="32, *">
+            <!-- BARRA DE TÍTULO CUSTOMIZADA (32px) -->
+            <Border Grid.Row="0"
+                    x:Name="TitleBar"
+                    Background="{DynamicResource TitleBarBackgroundBrush}"
+                    PointerPressed="TitleBar_PointerPressed">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <!-- Ícone e Nome da Janela -->
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Margin="10,0,0,0"
+                                IsHitTestVisible="False">
+                        <Image Source="app.ico" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="To-Do List"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleBarForegroundBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Botões Minimizar, Maximizar, Fechar -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Classes="titleBtn" Click="MinimizeButton_Click" ToolTip.Tip="Minimizar">
+                            <Path Data="M0,0 L10,0"
+                                  Stroke="{DynamicResource TitleBarForegroundBrush}"
+                                  StrokeThickness="1"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Classes="titleBtn" Click="MaximizeButton_Click" ToolTip.Tip="Maximizar">
+                            <Path Data="M0.5,0.5 L9.5,0.5 L9.5,9.5 L0.5,9.5 Z"
+                                  Stroke="{DynamicResource TitleBarForegroundBrush}"
+                                  StrokeThickness="1"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Classes="closeBtn" Click="CloseButton_Click" ToolTip.Tip="Fechar">
+                            <Path Data="M0,0 L10,10 M10,0 L0,10"
+                                  Stroke="{DynamicResource TitleBarForegroundBrush}"
+                                  StrokeThickness="1"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- CONTEÚDO PRINCIPAL DO APP -->
+            <Grid Grid.Row="1" Margin="20,14,20,16" RowDefinitions="Auto, Auto, Auto, Auto, *, Auto">
+                <!-- 0. TOP BAR (Perfil na Esquerda, Seletor de Tema e Nuvem na Direita) -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,14" LastChildFill="False">
+                    <!-- Botão de Sincronização em Nuvem (Direita) -->
+                    <Button x:Name="CloudSyncButton"
+                            DockPanel.Dock="Right"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Padding="6,3"
+                            Click="CloudSyncButton_Click"
+                            ToolTip.Tip="Sincronização em Nuvem (Firebase)">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="CloudSyncIcon"
+                                       Text="☁"
+                                       FontSize="15"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock x:Name="CloudSyncText"
+                                       Text="Nuvem"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Margin="5,0,2,0"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Seletor de Tema Claro / Escuro (Centro-Direita) -->
+                    <Button x:Name="ThemeToggleButton"
+                            DockPanel.Dock="Right"
+                            Margin="0,0,12,0"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Padding="4,2"
+                            Click="ThemeToggleButton_Click"
+                            ToolTip.Tip="Alternar entre Tema Claro e Escuro">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Ícone do Sol -->
+                            <Canvas Width="15" Height="15" Margin="0,0,5,0">
+                                <Path x:Name="SunIconPath"
+                                      Stroke="#F59E0B"
+                                      Fill="#33F59E0B"
+                                      StrokeThickness="1.5"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="M7.5 0.5v1.5M7.5 13v1.5M2.6 2.6l1 1M11.4 11.4l1 1M0.5 7.5h1.5M13 7.5h1.5M2.6 12.4l1-1M11.4 3.6l1-1 M7.5 4.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                            </Canvas>
+
+                            <!-- Pílula do Switch -->
+                            <Border x:Name="SwitchTrack"
+                                    Width="32" Height="18"
+                                    CornerRadius="9"
+                                    Background="{DynamicResource SubSurfaceBrush}"
+                                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                    BorderThickness="1"
+                                    VerticalAlignment="Center">
+                                <Canvas Width="30" Height="16">
+                                    <Border x:Name="SwitchThumb"
+                                            Width="12" Height="12"
+                                            CornerRadius="6"
+                                            Background="{DynamicResource PrimaryBrush}"
+                                            Canvas.Top="2" Canvas.Left="2"/>
+                                </Canvas>
+                            </Border>
+
+                            <!-- Ícone da Lua -->
+                            <Canvas Width="13" Height="13" Margin="5,0,0,0">
+                                <Path x:Name="MoonIconPath"
+                                      Stroke="{DynamicResource TextMutedBrush}"
+                                      Fill="Transparent"
+                                      StrokeThickness="1.5"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="M11.5 7A5 5 0 1 1 6.2 1.7 4 4 0 0 0 11.5 7z"/>
+                            </Canvas>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Botão de Perfil (Esquerda) -->
+                    <Button x:Name="ProfileButton"
+                            DockPanel.Dock="Left"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Padding="2,2,8,2"
+                            Click="ProfileButton_Click">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border x:Name="ProfileAvatarBorder"
+                                    Width="28" Height="28"
+                                    CornerRadius="14"
+                                    Background="Transparent"
+                                    BorderBrush="{DynamicResource PrimaryBrush}"
+                                    BorderThickness="1.5">
+                                <TextBlock x:Name="ProfileAvatarInitial"
+                                           Text="+"
+                                           FontSize="15"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource PrimaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="0,-1,0,0"/>
+                            </Border>
+                            <TextBlock x:Name="ProfileNameText"
+                                       Text="Nenhum perfil"
+                                       FontSize="13"
+                                       FontWeight="Medium"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0"/>
+                            <TextBlock Text="▼"
+                                       FontSize="8"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="6,1,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+
+                <!-- 1. HEADER (Minhas Tarefas, Data e Resumo) -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                    <TextBlock Text="Minhas Tarefas"
+                               FontSize="26"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextTitleBrush}"/>
+                    <DockPanel Margin="0,4,0,0">
+                        <TextBlock x:Name="DateText"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextSubtitleBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="SummaryText"
+                                   HorizontalAlignment="Right"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- 2. INPUT BAR -->
+                <Border Grid.Row="2"
+                        Background="{DynamicResource SurfaceBackgroundBrush}"
+                        CornerRadius="8"
+                        BorderBrush="{DynamicResource BorderDefaultBrush}"
+                        BorderThickness="1"
+                        Padding="4"
+                        Margin="0,0,0,16">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBox x:Name="NewTaskTextBox"
+                                 Padding="10,8"
+                                 FontSize="14"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                 Watermark="Digite uma nova tarefa e pressione Enter..."
+                                 VerticalAlignment="Center"
+                                 KeyDown="NewTaskTextBox_KeyDown"/>
+                        <Button Grid.Column="1"
+                                Content="+ Adicionar"
+                                Background="{DynamicResource PrimaryBrush}"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                FontSize="13"
+                                CornerRadius="6"
+                                Cursor="Hand"
+                                Padding="14,8"
+                                Click="AddTaskButton_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- 3. FILTROS -->
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,12">
+                    <Button x:Name="FilterAllButton"
+                            Content="Todas"
+                            CornerRadius="6"
+                            Padding="12,6"
+                            Margin="0,0,6,0"
+                            FontWeight="SemiBold"
+                            FontSize="12"
+                            Cursor="Hand"
+                            Click="FilterAllButton_Click"/>
+                    <Button x:Name="FilterPendingButton"
+                            Content="Pendentes"
+                            CornerRadius="6"
+                            Padding="12,6"
+                            Margin="0,0,6,0"
+                            FontWeight="SemiBold"
+                            FontSize="12"
+                            Cursor="Hand"
+                            Click="FilterPendingButton_Click"/>
+                    <Button x:Name="FilterCompletedButton"
+                            Content="Concluídas"
+                            CornerRadius="6"
+                            Padding="12,6"
+                            FontWeight="SemiBold"
+                            FontSize="12"
+                            Cursor="Hand"
+                            Click="FilterCompletedButton_Click"/>
+                </StackPanel>
+
+                <!-- 4. LISTA DE TAREFAS -->
+                <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+                    <Grid>
+                        <!-- Estado Vazio -->
+                        <StackPanel x:Name="EmptyStatePanel"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="0,40,0,0"
+                                    IsVisible="False">
+                            <TextBlock Text="🎉" FontSize="36" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Nenhuma tarefa por aqui!"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,8,0,2"/>
+                            <TextBlock Text="Aproveite o tempo livre ou adicione uma nova tarefa."
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- ItemsControl de Tarefas -->
+                        <ItemsControl x:Name="TodoListControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:TodoItem">
+                                    <Border Background="{DynamicResource SurfaceBackgroundBrush}"
+                                            CornerRadius="8"
+                                            BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                            BorderThickness="1"
+                                            Padding="12,10"
+                                            Margin="0,0,0,8"
+                                            Tag="{Binding}">
+                                        <StackPanel>
+                                            <!-- Linha Principal da Tarefa -->
+                                            <Grid ColumnDefinitions="Auto, Auto, *, Auto">
+                                                <!-- Grip ⋮⋮ -->
+                                                <TextBlock Grid.Column="0"
+                                                           Text="⋮⋮"
+                                                           FontSize="14"
+                                                           FontWeight="Bold"
+                                                           Foreground="{DynamicResource BorderHoverBrush}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,10,0"/>
+
+                                                <!-- CheckBox -->
+                                                <CheckBox Grid.Column="1"
+                                                          Classes="todoCheck"
+                                                          IsChecked="{Binding IsCompleted}"
+                                                          VerticalAlignment="Center"
+                                                          Margin="0,0,10,0"
+                                                          Click="TodoCheckBox_Click"
+                                                          Tag="{Binding}"/>
+
+                                                <!-- Título e Subtarefas -->
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               FontSize="14"
+                                                               FontWeight="Medium"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               Classes.completedTitle="{Binding IsCompleted}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    
+                                                    <!-- Botão Subtarefas X/Y -->
+                                                    <Button Background="Transparent"
+                                                            BorderThickness="0"
+                                                            Padding="0"
+                                                            Margin="0,3,0,0"
+                                                            HorizontalAlignment="Left"
+                                                            Cursor="Hand"
+                                                            Click="ToggleSubtasksButton_Click"
+                                                            Tag="{Binding}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding SubtasksSummary}"
+                                                                       FontSize="11"
+                                                                       FontWeight="SemiBold"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"/>
+                                                            <TextBlock Text="{Binding ExpandIcon}"
+                                                                       FontSize="9"
+                                                                       Foreground="{DynamicResource PrimaryBrush}"
+                                                                       Margin="4,1,0,0"
+                                                                       VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+
+                                                <!-- Botão Excluir Tarefa ✕ -->
+                                                <Button Grid.Column="3"
+                                                        Classes="delBtn"
+                                                        Click="DeleteButton_Click"
+                                                        Tag="{Binding}">
+                                                    <TextBlock Text="✕"
+                                                               FontSize="14"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Button>
+                                            </Grid>
+
+                                            <!-- Seção Expansível de Subtarefas -->
+                                            <Border IsVisible="{Binding IsExpanded}"
+                                                    Margin="28,8,0,2"
+                                                    Padding="0,6,0,0"
+                                                    BorderBrush="{DynamicResource DividerBrush}"
+                                                    BorderThickness="0,1,0,0">
+                                                <StackPanel>
+                                                    <!-- Lista de Subtarefas -->
+                                                    <ItemsControl ItemsSource="{Binding SubTasks}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:SubTaskItem">
+                                                                <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,3,0,3">
+                                                                    <CheckBox Grid.Column="0"
+                                                                              Classes="subtaskCheck"
+                                                                              IsChecked="{Binding IsCompleted}"
+                                                                              VerticalAlignment="Center"
+                                                                              Margin="0,0,8,0"
+                                                                              Click="SubTaskCheckBox_Click"
+                                                                              Tag="{Binding}"/>
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding Title}"
+                                                                               VerticalAlignment="Center"
+                                                                               FontSize="12"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                               Classes.completedTitle="{Binding IsCompleted}"
+                                                                               TextTrimming="CharacterEllipsis"/>
+                                                                    <Button Grid.Column="2"
+                                                                            Classes="delSubBtn"
+                                                                            Click="DeleteSubTaskButton_Click"
+                                                                            Tag="{Binding}">
+                                                                        <TextBlock Text="✕"
+                                                                                   FontSize="11"
+                                                                                   FontWeight="Bold"
+                                                                                   HorizontalAlignment="Center"
+                                                                                   VerticalAlignment="Center"/>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+
+                                                    <!-- Adicionar Nova Subtarefa -->
+                                                    <Grid ColumnDefinitions="*, Auto" Margin="0,6,0,2">
+                                                        <Border Background="{DynamicResource SubSurfaceBrush}"
+                                                                CornerRadius="4"
+                                                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                                                BorderThickness="1">
+                                                            <TextBox x:Name="NewSubtaskTextBox"
+                                                                     Padding="6,4"
+                                                                     FontSize="12"
+                                                                     Background="Transparent"
+                                                                     BorderThickness="0"
+                                                                     Watermark="Nova subtarefa..."
+                                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                     CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                                                     KeyDown="NewSubtaskTextBox_KeyDown"
+                                                                     Tag="{Binding}"/>
+                                                        </Border>
+                                                        <Button Grid.Column="1"
+                                                                Content="+ Adicionar"
+                                                                FontSize="11"
+                                                                FontWeight="SemiBold"
+                                                                Foreground="{DynamicResource PrimaryBrush}"
+                                                                Background="{DynamicResource PrimaryLightBrush}"
+                                                                BorderThickness="0"
+                                                                CornerRadius="4"
+                                                                Padding="8,4"
+                                                                Margin="6,0,0,0"
+                                                                Cursor="Hand"
+                                                                Click="AddSubTaskButton_Click"
+                                                                Tag="{Binding}"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </ScrollViewer>
+
+                <!-- 5. FOOTER (Tarefas Restantes e Limpar Concluídas) -->
+                <Border Grid.Row="5"
+                        Margin="0,12,0,0"
+                        BorderBrush="{DynamicResource BorderDefaultBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="0,12,0,0">
+                    <DockPanel>
+                        <TextBlock x:Name="RemainingCounterText"
+                                   Text="0 tarefas restantes"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource TextSubtitleBrush}"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="Limpar concluídas"
+                                HorizontalAlignment="Right"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                FontSize="12"
+                                Foreground="{DynamicResource TextSubtitleBrush}"
+                                Cursor="Hand"
+                                Click="ClearCompletedButton_Click"/>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ============================================== -->
+        <!-- MODAIS (PERFIL, CRIAÇÃO DE PERFIL E NUVEM)     -->
+        <!-- ============================================== -->
+
+        <!-- MODAL: SELETOR DE PERFIL -->
+        <Border x:Name="ProfileModal"
+                Background="{DynamicResource ModalBackdropBrush}"
+                ZIndex="100"
+                IsVisible="False"
+                PointerPressed="ProfileModalBackdrop_PointerPressed">
+            <Border Background="{DynamicResource ModalSurfaceBrush}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="1"
+                    Padding="16"
+                    MinWidth="240"
+                    MaxWidth="300"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <TextBlock Text="PERFIS"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextMutedBrush}"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="✕"
+                                HorizontalAlignment="Right"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="{DynamicResource TextMutedBrush}"
+                                Click="CloseProfileModalButton_Click"/>
+                    </DockPanel>
+
+                    <!-- Lista de Perfis -->
+                    <ItemsControl x:Name="ProfilesItemsControl">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:UserProfile">
+                                <Button Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Padding="6,6"
+                                        Margin="0,2"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch"
+                                        Click="ProfileItem_Click"
+                                        Tag="{Binding}">
+                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto">
+                                        <!-- Avatar -->
+                                        <Border Grid.Column="0"
+                                                Width="26" Height="26"
+                                                CornerRadius="13"
+                                                Background="{DynamicResource PrimaryBrush}"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Initial}"
+                                                       FontSize="11"
+                                                       FontWeight="Bold"
+                                                       Foreground="White"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Border>
+                                        <!-- Nome -->
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Name}"
+                                                   FontSize="13"
+                                                   FontWeight="Medium"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="8,0,0,0"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <!-- Check ativo -->
+                                        <TextBlock Grid.Column="2"
+                                                   Text="✓"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="4,0,6,0"
+                                                   IsVisible="{Binding IsActive}"/>
+                                        <!-- Excluir Perfil -->
+                                        <Button Grid.Column="3"
+                                                Content="✕"
+                                                FontSize="11"
+                                                Classes="delSubBtn"
+                                                Click="DeleteProfileButton_Click"
+                                                Tag="{Binding}"/>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,8,0,8"/>
+
+                    <!-- Botão Criar Perfil -->
+                    <Button Content="+ Criar novo perfil"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Background="{DynamicResource PrimaryLightBrush}"
+                            Foreground="{DynamicResource PrimaryBrush}"
+                            FontWeight="SemiBold"
+                            FontSize="12"
+                            CornerRadius="6"
+                            Padding="8,8"
+                            Click="OpenCreateProfileModalButton_Click"/>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- MODAL: CRIAR NOVO PERFIL -->
+        <Border x:Name="CreateProfileModal"
+                Background="{DynamicResource ModalBackdropBrush}"
+                ZIndex="101"
+                IsVisible="False"
+                PointerPressed="CreateProfileModalBackdrop_PointerPressed">
+            <Border Background="{DynamicResource ModalSurfaceBrush}"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="1"
+                    Padding="18"
+                    MinWidth="280"
+                    MaxWidth="320"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Text="Criar Novo Perfil"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextTitleBrush}"
+                               Margin="0,0,0,12"/>
+                    <TextBox x:Name="NewProfileNameTextBox"
+                             Watermark="Nome do perfil..."
+                             Padding="10,8"
+                             FontSize="13"
+                             CornerRadius="6"
+                             BorderBrush="{DynamicResource BorderDefaultBrush}"
+                             BorderThickness="1"
+                             Background="{DynamicResource SubSurfaceBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             CaretBrush="{DynamicResource TextPrimaryBrush}"
+                             KeyDown="NewProfileNameTextBox_KeyDown"
+                             Margin="0,0,0,14"/>
+                    <Grid ColumnDefinitions="*, 8, *">
+                        <Button Grid.Column="0"
+                                Content="Cancelar"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Background="{DynamicResource SubSurfaceBrush}"
+                                Foreground="{DynamicResource TextSecondaryBrush}"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                Click="CancelCreateProfileButton_Click"/>
+                        <Button Grid.Column="2"
+                                Content="Criar"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Background="{DynamicResource PrimaryBrush}"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                CornerRadius="6"
+                                Padding="10,8"
+                                Click="ConfirmCreateProfileButton_Click"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- MODAL: SINCRONIZAÇÃO EM NUVEM (FIREBASE) -->
+        <Border x:Name="CloudSyncModal"
+                Background="{DynamicResource ModalBackdropBrush}"
+                ZIndex="102"
+                IsVisible="False"
+                PointerPressed="CloudSyncModalBackdrop_PointerPressed">
+            <Border Background="{DynamicResource ModalSurfaceBrush}"
+                    CornerRadius="12"
+                    BorderBrush="{DynamicResource BorderDefaultBrush}"
+                    BorderThickness="1"
+                    Padding="20"
+                    MinWidth="320"
+                    MaxWidth="380"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel>
+                    <!-- Cabeçalho -->
+                    <DockPanel Margin="0,0,0,14">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="☁" FontSize="18" Foreground="{DynamicResource PrimaryBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Sincronização em Nuvem" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextTitleBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Content="✕"
+                                HorizontalAlignment="Right"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="{DynamicResource TextMutedBrush}"
+                                Click="CloseCloudSyncModalButton_Click"/>
+                    </DockPanel>
+
+                    <!-- PAINEL DESCONECTADO (LOGIN / CADASTRO) -->
+                    <StackPanel x:Name="CloudAuthPanel">
+                        <!-- Alternador Entrar / Criar Conta -->
+                        <Grid ColumnDefinitions="*, 6, *" Margin="0,0,0,12">
+                            <Button x:Name="CloudTabLoginButton"
+                                    Grid.Column="0"
+                                    Content="Entrar"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    FontSize="12"
+                                    CornerRadius="6"
+                                    Padding="10,6"
+                                    Click="CloudTabLoginButton_Click"/>
+                            <Button x:Name="CloudTabRegisterButton"
+                                    Grid.Column="2"
+                                    Content="Criar Conta"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    FontSize="12"
+                                    CornerRadius="6"
+                                    Padding="10,6"
+                                    Click="CloudTabRegisterButton_Click"/>
+                        </Grid>
+
+                        <!-- E-mail -->
+                        <TextBlock Text="E-mail" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="CloudEmailTextBox"
+                                 Watermark="seu@email.com"
+                                 Padding="10,8"
+                                 FontSize="13"
+                                 CornerRadius="6"
+                                 Background="{DynamicResource SubSurfaceBrush}"
+                                 BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                 BorderThickness="1"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Senha -->
+                        <TextBlock Text="Senha" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                        <TextBox x:Name="CloudPasswordBox"
+                                 Watermark="••••••••"
+                                 PasswordChar="●"
+                                 Padding="10,8"
+                                 FontSize="13"
+                                 CornerRadius="6"
+                                 Background="{DynamicResource SubSurfaceBrush}"
+                                 BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                 BorderThickness="1"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 CaretBrush="{DynamicResource TextPrimaryBrush}"
+                                 KeyDown="CloudPasswordBox_KeyDown"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Mensagem de Erro -->
+                        <TextBlock x:Name="CloudAuthErrorText"
+                                   Foreground="{DynamicResource DangerBrush}"
+                                   FontSize="11"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"
+                                   IsVisible="False"/>
+
+                        <!-- Botão Ação -->
+                        <Button x:Name="CloudAuthSubmitButton"
+                                Content="Entrar na Conta"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Background="{DynamicResource PrimaryBrush}"
+                                Foreground="White"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                CornerRadius="6"
+                                Padding="16,9"
+                                Click="CloudAuthSubmitButton_Click"/>
+                    </StackPanel>
+
+                    <!-- PAINEL CONECTADO (STATUS E SINCRONIZAR) -->
+                    <StackPanel x:Name="CloudConnectedPanel" IsVisible="False">
+                        <Border Background="{DynamicResource SubSurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12"
+                                Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock Text="● Conectado"
+                                           FontWeight="Bold"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SuccessBrush}"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock x:Name="CloudUserEmailText"
+                                           Text="usuario@email.com"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock x:Name="CloudLastSyncText"
+                                           Text="Última sincronização: Há poucos segundos"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSubtitleBrush}"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button x:Name="CloudManualSyncButton"
+                                Content="🔄 Sincronizar Agora"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Background="{DynamicResource PrimaryLightBrush}"
+                                Foreground="{DynamicResource PrimaryBrush}"
+                                FontSize="13"
+                                FontWeight="SemiBold"
+                                CornerRadius="6"
+                                Padding="16,9"
+                                Click="CloudManualSyncButton_Click"/>
+
+                        <Button Content="Desconectar desta conta"
+                                HorizontalAlignment="Center"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="{DynamicResource DangerBrush}"
+                                FontSize="12"
+                                Cursor="Hand"
+                                Margin="0,14,0,0"
+                                Click="CloudSignOutButton_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

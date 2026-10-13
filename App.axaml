@@ -1,0 +1,48 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="TodoListApp.Linux.App"
+             RequestedThemeVariant="Light">
+
+    <Application.Resources>
+        <!-- Cores Padrão (Tema Claro) -->
+        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SubSurfaceBrush" Color="#F1F5F9"/>
+        <SolidColorBrush x:Key="BorderDefaultBrush" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="BorderHoverBrush" Color="#CBD5E1"/>
+
+        <SolidColorBrush x:Key="TextTitleBrush" Color="#0F172A"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1E293B"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569"/>
+        <SolidColorBrush x:Key="TextSubtitleBrush" Color="#64748B"/>
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#94A3B8"/>
+
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#4F46E5"/>
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#4338CA"/>
+        <SolidColorBrush x:Key="PrimaryLightBrush" Color="#EEF2FF"/>
+        <SolidColorBrush x:Key="PrimaryHoverLightBrush" Color="#E0E7FF"/>
+
+        <SolidColorBrush x:Key="ScrollbarTrackBrush" Color="Transparent"/>
+        <SolidColorBrush x:Key="ScrollbarTrackThumbBrush" Color="#A5B4FC"/>
+        <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="#818CF8"/>
+        <SolidColorBrush x:Key="ScrollbarThumbDragBrush" Color="#6366F1"/>
+
+        <SolidColorBrush x:Key="SuccessBrush" Color="#10B981"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#EF4444"/>
+        <SolidColorBrush x:Key="DangerLightBrush" Color="#FEE2E2"/>
+
+        <SolidColorBrush x:Key="ModalBackdropBrush" Color="#660F172A"/>
+        <SolidColorBrush x:Key="ModalSurfaceBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="DividerBrush" Color="#F1F5F9"/>
+
+        <!-- Barra de Título Customizada (Tema Claro Padrão) -->
+        <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#F1F5F9"/>
+        <SolidColorBrush x:Key="TitleBarForegroundBrush" Color="#64748B"/>
+        <SolidColorBrush x:Key="TitleBarButtonHoverBrush" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="TitleBarCloseHoverBrush" Color="#EF4444"/>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

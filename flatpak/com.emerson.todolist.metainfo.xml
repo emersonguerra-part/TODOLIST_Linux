@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.emerson.todolist</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>To-Do List</name>
+  <summary>Gerenciador de tarefas nativo com sincronização em nuvem e efeitos sonoros</summary>
+  <description>
+    <p>
+      Aplicativo de produtividade moderno e intuitivo construído em Avalonia UI e .NET 8.
+      Oferece sincronização em tempo real com Firebase Firestore, suporte a múltiplos perfis,
+      temas claro e escuro, tarefas e subtarefas expansíveis com efeitos visuais e sonoros festivos.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.emerson.todolist.desktop</launchable>
+  <provides>
+    <binary>TodoListApp.Linux</binary>
+  </provides>
+</component>

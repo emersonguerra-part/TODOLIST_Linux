@@ -1,0 +1,36 @@
+app-id: com.emerson.todolist
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: TodoListApp.Linux
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --share=network
+  - --device=dri
+  - --filesystem=xdg-data/TodoListApp:create
+
+modules:
+  - name: todolist
+    buildsystem: simple
+    build-commands:
+      - install -d /app/bin
+      - install -d /app/lib/todolist
+      - cp -r * /app/lib/todolist/
+      - chmod +x /app/lib/todolist/TodoListApp.Linux
+      - ln -s /app/lib/todolist/TodoListApp.Linux /app/bin/TodoListApp.Linux
+      - install -D com.emerson.todolist.desktop /app/share/applications/com.emerson.todolist.desktop
+      - install -D com.emerson.todolist.png /app/share/icons/hicolor/256x256/apps/com.emerson.todolist.png
+      - install -D com.emerson.todolist.metainfo.xml /app/share/metainfo/com.emerson.todolist.metainfo.xml
+    sources:
+      - type: dir
+        path: ../publish_linux
+      - type: file
+        path: com.emerson.todolist.desktop
+      - type: file
+        path: com.emerson.todolist.png
+      - type: file
+        path: com.emerson.todolist.metainfo.xml
